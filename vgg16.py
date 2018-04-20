@@ -18,7 +18,8 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      name="conv1"
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
+      name="conv1",
     )
     _activation_summary(conv1)
 
@@ -28,6 +29,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv2"
     )
     _activation_summary(conv2)
@@ -40,7 +42,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv3"
     )
     _activation_summary(conv3)
@@ -51,7 +53,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv4"
     )
     _activation_summary(conv4)
@@ -64,7 +66,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv5"
     )
     _activation_summary(conv5)
@@ -75,7 +77,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv6"
     )
     _activation_summary(conv6)
@@ -86,7 +88,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv7"
     )
     _activation_summary(conv7)
@@ -99,7 +101,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv8"
     )
     _activation_summary(conv8)
@@ -110,7 +112,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv9"
     )
     _activation_summary(conv9)
@@ -121,7 +123,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv10"
     )
     _activation_summary(conv10)
@@ -134,7 +136,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv11"
     )
     _activation_summary(conv11)
@@ -145,7 +147,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv12"
     )
     _activation_summary(conv12)
@@ -156,7 +158,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="conv13"
     )
     _activation_summary(conv13)
@@ -168,12 +170,11 @@ def vgg16_model_fn(features, labels, mode, params):
       inputs=pool5_flat,
       units=4096,
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
       name="fc1"
     )
 
     fc1_dropout = tf.layers.dropout(
-        inputs=fc1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc1_dropout"
+        inputs=fc1, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc1_dropout"
     )
     _activation_summary(fc1_dropout)
 
@@ -181,12 +182,11 @@ def vgg16_model_fn(features, labels, mode, params):
       inputs=fc1_dropout,
       units=4096,
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.0005),
       name="fc2"
     )
 
     fc2_dropout = tf.layers.dropout(
-        inputs=fc2, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc2_dropout"
+        inputs=fc2, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc2_dropout"
     )
     _activation_summary(fc2_dropout)
 
