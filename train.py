@@ -19,7 +19,7 @@ num_epoches = None
 
 initial_learning_rate = 0.01
 learning_rate_decay_steps = 100000
-learning_rate_decay_factor = 0.001
+learning_rate_decay_factor = 0.01
 
 def _parse_function_train(filename, label):
   image_string = tf.read_file(filename)
