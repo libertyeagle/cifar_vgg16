@@ -15,13 +15,31 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
 
 batch_size = 32
-num_epoches = 74
+num_epoches = None
 
-def _parse_function(filename, label):
+initial_learning_rate = 0.01
+learning_rate_decay_steps = 100000
+learning_rate_decay_factor = 0.01
+
+def _parse_function_train(filename, label):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string)
   image_resized = tf.image.resize_images(image_decoded, [224, 224])
+  image_processed = tf.cast(image_resized, tf.float32)
+  image_processed = tf.image.random_flip_left_right(image_resized)
+  image_processed = tf.image.random_brightness(image_processed, max_delta=63)
+  image_processed = tf.image.random_contrast(image_processed, lower=0.2, upper=1)
+  image_processed = tf.image.per_image_standardization(image_processed)
+  
+  return {"image_data" : image_processed}, label
+
+def _parse_function_eval(filename, label):
+  image_string = tf.read_file(filename)
+  image_decoded = tf.image.decode_png(image_string)
+  image_resized = tf.image.resize_images(image_decoded, [224, 224])
+  
   return {"image_data" : image_resized}, label
+
 
 def train_input_fn():
     description_file = open("dataset_original/train/data_description.csv", 'r')
@@ -36,8 +54,8 @@ def train_input_fn():
     filenames = tf.constant(dataset_filenames)
     labels = tf.constant(dataset_labels)
     dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
-    dataset = dataset.map(_parse_function)
-    dataset = dataset.repeat().batch(batch_size)
+    dataset = dataset.map(_parse_function_train)
+    dataset = dataset.shuffle(3 * batch_size).repeat().batch(batch_size)
 
     iterator = dataset.make_one_shot_iterator()
     ret_features, ret_labels = iterator.get_next()
@@ -57,7 +75,7 @@ def eval_input_fn():
     filenames = tf.constant(dataset_filenames)
     labels = tf.constant(dataset_labels)
     dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
-    dataset = dataset.map(_parse_function)
+    dataset = dataset.map(_parse_function_eval)
     dataset = dataset.batch(batch_size)
     
     iterator = dataset.make_one_shot_iterator()
@@ -89,7 +107,12 @@ def main(unused_argv):
 
     cifar10_classifier = tf.estimator.Estimator(
         model_fn=vgg16_model_fn, model_dir="cifar_vgg16_model",
-        params={"n_classes" : 10}
+        params={
+            "n_classes": 10,
+            "initial_learning_rate": initial_learning_rate,
+            "learning_rate_decay_steps": learning_rate_decay_steps,
+            "learning_rate_decay_factor": learning_rate_decay_factor
+        }
     )
     
     train_spec = tf.estimator.TrainSpec(
