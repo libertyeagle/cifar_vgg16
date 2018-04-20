@@ -173,7 +173,7 @@ def vgg16_model_fn(features, labels, mode, params):
     )
 
     fc1_dropout = tf.layers.dropout(
-        inputs=fc1, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc1_dropout"
+        inputs=fc1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc1_dropout"
     )
     _activation_summary(fc1_dropout)
 
@@ -186,7 +186,7 @@ def vgg16_model_fn(features, labels, mode, params):
     )
 
     fc2_dropout = tf.layers.dropout(
-        inputs=fc2, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc2_dropout"
+        inputs=fc2, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc2_dropout"
     )
     _activation_summary(fc2_dropout)
 

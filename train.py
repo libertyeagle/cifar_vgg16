@@ -37,8 +37,10 @@ def _parse_function_eval(filename, label):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string)
   image_resized = tf.image.resize_images(image_decoded, [224, 224])
-  
-  return {"image_data" : image_resized}, label
+  image_processed = tf.cast(image_resized, tf.float32)
+  image_processed = tf.image.per_image_standardization(image_processed)
+
+  return {"image_data" : image_processed}, label
 
 
 def train_input_fn():
