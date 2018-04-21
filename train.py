@@ -17,9 +17,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
 batch_size = 32
 num_epoches = None
 
-initial_learning_rate = 0.01
-learning_rate_decay_steps = 100000
-learning_rate_decay_factor = 0.01
+learning_rate = 0.001
 
 def _parse_function_train(filename, label):
   image_string = tf.read_file(filename)
@@ -111,9 +109,7 @@ def main(unused_argv):
         model_fn=vgg16_model_fn, model_dir="cifar_vgg16_model",
         params={
             "n_classes": 10,
-            "initial_learning_rate": initial_learning_rate,
-            "learning_rate_decay_steps": learning_rate_decay_steps,
-            "learning_rate_decay_factor": learning_rate_decay_factor
+            "initial_learning_rate": learning_rate
         }
     )
     

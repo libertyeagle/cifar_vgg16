@@ -7,9 +7,7 @@ def _activation_summary(x):
     
 def vgg16_model_fn(features, labels, mode, params):
     n_classes = params['n_classes']
-    initial_learning_rate = params['initial_learning_rate']
-    learning_rate_decay_steps = params['learning_rate_decay_steps']
-    learning_rate_decay_factor = params['learning_rate_decay_factor']
+    learning_rate = params['learning_rate']
 
     input_layer = tf.reshape(features["image_data"], [-1, 224, 224, 3])
     conv1 = tf.layers.conv2d(
@@ -157,29 +155,15 @@ def vgg16_model_fn(features, labels, mode, params):
       inputs=pool5_flat,
       units=4096,
       activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
       name="fc1"
     )
 
     fc1_dropout = tf.layers.dropout(
-        inputs=fc1, rate=0.6, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc1_dropout"
+        inputs=fc1, rate=0.5, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc1_dropout"
     )
     _activation_summary(fc1_dropout)
 
-    fc2 = tf.layers.dense(
-      inputs=fc1_dropout,
-      units=4096,
-      activation=tf.nn.relu,
-      kernel_regularizer=tf.contrib.layers.l2_regularizer(0.001),
-      name="fc2"
-    )
-
-    fc2_dropout = tf.layers.dropout(
-        inputs=fc2, rate=0.6, training=mode == tf.estimator.ModeKeys.TRAIN, name="fc2_dropout"
-    )
-    _activation_summary(fc2_dropout)
-
-    logits = tf.layers.dense(inputs=fc2_dropout, units=n_classes, name="logits")
+    logits = tf.layers.dense(inputs=fc1_dropout, units=n_classes, name="logits")
 
     predictions = {
       "classes": tf.argmax(input=logits, axis=1),
@@ -190,20 +174,12 @@ def vgg16_model_fn(features, labels, mode, params):
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits) + tf.losses.get_regularization_loss()
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         for var in tf.trainable_variables():
           tf.summary.histogram(var.op.name, var)
 
-        learning_rate = tf.train.exponential_decay(
-          learning_rate=initial_learning_rate,
-          decay_steps=learning_rate_decay_steps,
-          decay_rate=learning_rate_decay_factor,
-          global_step=tf.train.get_global_step()
-        )
-        tf.summary.scalar("learning_rate", learning_rate)
-    
         optimizer = tf.train.MomentumOptimizer(momentum=0.9, learning_rate=learning_rate)
 
         grads = optimizer.compute_gradients(loss)
