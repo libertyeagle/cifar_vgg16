@@ -22,9 +22,8 @@ learning_rate = 0.001
 def _parse_function_train(filename, label):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string)
-  image_resized = tf.image.resize_images(image_decoded, [224, 224])
-  image_processed = tf.cast(image_resized, tf.float32)
-  image_processed = tf.image.random_flip_left_right(image_resized)
+  image_processed = tf.cast(image_decoded, tf.float32)
+  image_processed = tf.image.random_flip_left_right(image_processed)
   image_processed = tf.image.random_brightness(image_processed, max_delta=63)
   image_processed = tf.image.random_contrast(image_processed, lower=0.2, upper=1)
   image_processed = tf.image.per_image_standardization(image_processed)
@@ -34,8 +33,7 @@ def _parse_function_train(filename, label):
 def _parse_function_eval(filename, label):
   image_string = tf.read_file(filename)
   image_decoded = tf.image.decode_png(image_string)
-  image_resized = tf.image.resize_images(image_decoded, [224, 224])
-  image_processed = tf.cast(image_resized, tf.float32)
+  image_processed = tf.cast(image_decoded, tf.float32)
   image_processed = tf.image.per_image_standardization(image_processed)
 
   return {"image_data" : image_processed}, label
@@ -109,7 +107,7 @@ def main(unused_argv):
         model_fn=vgg16_model_fn, model_dir="cifar_vgg16_model",
         params={
             "n_classes": 10,
-            "initial_learning_rate": learning_rate
+            "learning_rate": learning_rate
         }
     )
     

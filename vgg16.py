@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
+weight_decay = 0.0005
+
 def _activation_summary(x):
     tf.summary.histogram(x.op.name + '/activations', x)
     tf.summary.scalar(x.op.name + '/sparsity', tf.nn.zero_fraction(x))
@@ -9,13 +11,14 @@ def vgg16_model_fn(features, labels, mode, params):
     n_classes = params['n_classes']
     learning_rate = params['learning_rate']
 
-    input_layer = tf.reshape(features["image_data"], [-1, 224, 224, 3])
+    input_layer = tf.reshape(features["image_data"], [-1, 32, 32, 3])
     conv1 = tf.layers.conv2d(
       inputs=input_layer,
       filters=64,
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv1",
     )
     _activation_summary(conv1)
@@ -26,6 +29,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv2"
     )
     _activation_summary(conv2)
@@ -38,6 +42,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv3"
     )
     _activation_summary(conv3)
@@ -48,6 +53,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv4"
     )
     _activation_summary(conv4)
@@ -70,6 +76,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv6"
     )
     _activation_summary(conv6)
@@ -80,6 +87,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv7"
     )
     _activation_summary(conv7)
@@ -92,6 +100,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv8"
     )
     _activation_summary(conv8)
@@ -102,6 +111,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv9"
     )
     _activation_summary(conv9)
@@ -124,6 +134,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv11"
     )
     _activation_summary(conv11)
@@ -134,6 +145,7 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv12"
     )
     _activation_summary(conv12)
@@ -144,17 +156,19 @@ def vgg16_model_fn(features, labels, mode, params):
       kernel_size=[3, 3],
       padding="same",
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="conv13"
     )
     _activation_summary(conv13)
 
     pool5 = tf.layers.max_pooling2d(inputs=conv13, pool_size=[2, 2], strides=2, name="pool5")
-    pool5_flat = tf.reshape(pool5, [-1, 7 * 7 * 512])
+    pool5_flat = tf.reshape(pool5, [-1, 1 * 1 * 512])
     
     fc1 = tf.layers.dense(
       inputs=pool5_flat,
-      units=4096,
+      units=512,
       activation=tf.nn.relu,
+      kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="fc1"
     )
 
@@ -174,7 +188,7 @@ def vgg16_model_fn(features, labels, mode, params):
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
-    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits) + tf.losses.get_regularization_loss()
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         for var in tf.trainable_variables():
