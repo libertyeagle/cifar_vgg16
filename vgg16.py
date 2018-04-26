@@ -166,7 +166,7 @@ def vgg16_model_fn(features, labels, mode, params):
     
     fc1 = tf.layers.dense(
       inputs=pool5_flat,
-      units=1024,
+      units=256,
       activation=tf.nn.relu,
       kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
       name="fc1"
